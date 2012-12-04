@@ -8,28 +8,40 @@
 	<packaging>jar</packaging>
 
 	<name>vraptor-quartzjob</name>
-	<url>http://maven.apache.org</url>
+	<url>http://github.com/caelum/vraptor-simplemail</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<scm>
+		<url>http://github.com/caelum/vraptor-quartzjob</url>
+		<connection>scm:git:git://github.com/caelum/vraptor-quartzjob</connection>
+		<developerConnection>scm:git:git@github.com:caelum/vraptor-quartzjob.git</developerConnection>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>br.com.caelum</groupId>
 			<artifactId>vraptor</artifactId>
-			<version>3.4.0</version>
+			<version>3.4.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>br.com.caelum.vraptor</groupId>
 			<artifactId>vraptor-environment</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>br.com.caelum.vraptor</groupId>
 			<artifactId>vraptor-mauth</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -67,8 +79,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.6</source>
+					<target>1.6</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
