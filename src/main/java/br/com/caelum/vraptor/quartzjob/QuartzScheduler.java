@@ -1,13 +1,19 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import br.com.caelum.vraptor.environment.Environment;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 import br.com.caelum.vraptor.ioc.Component;
 
@@ -15,11 +21,48 @@ import br.com.caelum.vraptor.ioc.Component;
 @Component
 public class QuartzScheduler {
 
+	private static final int TEN_SECONDS = 10000;
 	private final Scheduler scheduler;
 	private boolean initialized;
 
-	public QuartzScheduler() throws SchedulerException {
+	private final static Logger logger = LoggerFactory.getLogger(QuartzScheduler.class);
+	private final Environment env;
+	
+	public QuartzScheduler(Environment env) throws SchedulerException {
+		this.env = env;
 		scheduler = StdSchedulerFactory.getDefaultScheduler();
+	}
+	
+	@PostConstruct
+	public void initialize() {
+		try {
+			logger.info("Quartz servlet config initializing...");
+			
+			final String url = env.get("host") + "/jobs/configure";
+
+			Runnable quartzMe = new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						waitForServerStartup();
+						logger.info("Invoking quartz configurator at " + url);
+						HttpClient http = new HttpClient();
+						http.executeMethod(new GetMethod(url));
+					} catch (Exception e) {
+						logger.error("Could not start quartz!", e);
+					}
+				}
+
+				private void waitForServerStartup() throws InterruptedException {
+					Thread.sleep(TEN_SECONDS);
+				}
+			};
+			new Thread(quartzMe).start();
+			
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public void add(JobDetail job, Trigger trigger) throws SchedulerException {
