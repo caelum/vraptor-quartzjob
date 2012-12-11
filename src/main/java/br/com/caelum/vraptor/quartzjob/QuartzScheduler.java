@@ -37,7 +37,8 @@ public class QuartzScheduler {
 	public void initialize() {
 		try {
 			logger.info("Quartz servlet config initializing...");
-			
+			if(!env.getName().equals("production")) return;
+
 			final String url = env.get("host") + "/jobs/configure";
 
 			Runnable quartzMe = new Runnable() {
