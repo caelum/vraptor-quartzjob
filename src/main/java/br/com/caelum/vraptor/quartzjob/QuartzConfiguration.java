@@ -33,7 +33,7 @@ public class QuartzConfiguration {
 
 		for(CronTask task : tasks) {
 			linker.linkTo(task).execute();
-			String url = linker.get();
+			String url = linker.get().replace("https", "http");
 
 			JobDetail job = newJob(QuartzHttpRequestJob.class)
 					.withIdentity(task.getClass().getName(), "gnarus")
