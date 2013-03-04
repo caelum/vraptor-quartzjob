@@ -39,30 +39,37 @@ public class QuartzScheduler {
 			logger.info("Quartz servlet config initializing...");
 			if(!env.getName().equals("production")) return;
 
-			final String url = env.get("host") + "/jobs/configure";
+			String url = (env.get("host") + "/jobs/configure").replace("https", "http");
 
-			Runnable quartzMe = new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						waitForServerStartup();
-						logger.info("Invoking quartz configurator at " + url);
-						HttpClient http = new HttpClient();
-						http.executeMethod(new GetMethod(url));
-					} catch (Exception e) {
-						logger.error("Could not start quartz!", e);
-					}
-				}
-
-				private void waitForServerStartup() throws InterruptedException {
-					Thread.sleep(TEN_SECONDS);
-				}
-			};
+			Runnable quartzMe = new StartQuartz(url);
 			new Thread(quartzMe).start();
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	class StartQuartz implements Runnable {
+		private final String url;
+
+		public StartQuartz(String url) {
+			this.url = url;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				waitForServerStartup();
+				logger.info("Invoking quartz configurator at " + url);
+				HttpClient http = new HttpClient();
+				http.executeMethod(new GetMethod(url));
+			} catch (Exception e) {
+				logger.error("Could not start quartz!", e);
+			}
+		}
+
+		private void waitForServerStartup() throws InterruptedException {
+			Thread.sleep(TEN_SECONDS);
 		}
 	}
 	
