@@ -18,7 +18,8 @@ public class QuartzController {
 	private final QuartzScheduler scheduler;
 	private final Result result;
 
-	public QuartzController(List<CronTask> tasks, QuartzConfiguration cfg, QuartzScheduler scheduler, Result result) {
+	public QuartzController(List<CronTask> tasks, QuartzConfiguration cfg, 
+			QuartzScheduler scheduler, Result result) {
 		this.tasks = tasks;
 		this.cfg = cfg;
 		this.scheduler = scheduler;
@@ -26,8 +27,13 @@ public class QuartzController {
 	}
 	
 	@Get("/jobs/configure")
-	public void config() throws SchedulerException {
-		if(!scheduler.isInitialized()) cfg.configure(tasks);
-		result.nothing();
+	public void config() {
+			try {
+				if (!scheduler.isInitialized())
+					cfg.configure(tasks);
+				result.nothing();
+			} catch (SchedulerException e) {
+				throw new RuntimeException("could not configure scheduler", e);
+			}
 	}
 }

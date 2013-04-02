@@ -21,9 +21,9 @@ public class QuartzConfiguration {
 
 	private final Linker linker;
 
-	private final QuartzScheduler scheduler;
+	private final DefaultQuartzScheduler scheduler;
 
-	public QuartzConfiguration(DefaultLinker linker, QuartzScheduler scheduler) throws SchedulerException {
+	public QuartzConfiguration(DefaultLinker linker, DefaultQuartzScheduler scheduler) throws SchedulerException {
 		this.linker = linker;
 		this.scheduler = scheduler;
 	}
