@@ -62,7 +62,10 @@ public class QuartzScheduler {
 				waitForServerStartup();
 				logger.info("Invoking quartz configurator at " + url);
 				HttpClient http = new HttpClient();
-				http.executeMethod(new GetMethod(url));
+				int status = http.executeMethod(new GetMethod(url));
+				if (status != 200) {
+					throw new RuntimeException("could not configure quartz, " + url + "answered with " + status);
+				}
 			} catch (Exception e) {
 				logger.error("Could not start quartz!", e);
 			}
