@@ -15,10 +15,11 @@ public class QuartzController {
 
 	private final List<CronTask> tasks;
 	private final QuartzConfiguration cfg;
-	private final DefaultQuartzScheduler scheduler;
+	private final QuartzScheduler scheduler;
 	private final Result result;
 
-	public QuartzController(List<CronTask> tasks, QuartzConfiguration cfg, DefaultQuartzScheduler scheduler, Result result) {
+	public QuartzController(List<CronTask> tasks, QuartzConfiguration cfg, 
+			QuartzScheduler scheduler, Result result) {
 		this.tasks = tasks;
 		this.cfg = cfg;
 		this.scheduler = scheduler;
