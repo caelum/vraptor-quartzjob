@@ -7,7 +7,7 @@
 	<packaging>jar</packaging>
 
 	<name>vraptor-quartzjob</name>
-	<url>http://github.com/caelum/vraptor-simplemail</url>
+	<url>http://github.com/caelum/vraptor-quartzjob</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
