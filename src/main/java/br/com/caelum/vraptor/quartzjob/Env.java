@@ -1,18 +1,21 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
 import br.com.caelum.vraptor.environment.Environment;
-import br.com.caelum.vraptor.ioc.ApplicationScoped;
-import br.com.caelum.vraptor.ioc.Component;
+import br.com.caelum.vraptor4.ioc.ApplicationScoped;
 
-@Component
 @ApplicationScoped
 public class Env {
 
-	private final Environment env;
-	private final ServletContext context;
+	private Environment env;
+	private ServletContext context;
 
+	@Deprecated // CDI eyes only
+	public Env() {}
+
+	@Inject
 	public Env(Environment env, ServletContext context) {
 		this.env = env;
 		this.context = context;
@@ -28,7 +31,7 @@ public class Env {
 	public String host() {
 		return env.get("host");
 	}
-	
+
 	public String get(String key) {
 		return env.get(key);
 	}

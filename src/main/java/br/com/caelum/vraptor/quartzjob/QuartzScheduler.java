@@ -2,6 +2,7 @@ package br.com.caelum.vraptor.quartzjob;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -14,25 +15,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.vraptor.environment.Environment;
-import br.com.caelum.vraptor.ioc.ApplicationScoped;
-import br.com.caelum.vraptor.ioc.Component;
+import br.com.caelum.vraptor4.ioc.ApplicationScoped;
 
 @ApplicationScoped
-@Component
 public class QuartzScheduler {
 
 	private static final int TEN_SECONDS = 10000;
-	private final Scheduler scheduler;
+	private Scheduler scheduler;
 	private boolean initialized;
 
 	private final static Logger logger = LoggerFactory.getLogger(QuartzScheduler.class);
-	private final Environment env;
-	
+	private Environment env;
+
+	@Deprecated // CDI eyes only
+	public QuartzScheduler() {}
+
+	@Inject
 	public QuartzScheduler(Environment env) throws SchedulerException {
 		this.env = env;
 		scheduler = StdSchedulerFactory.getDefaultScheduler();
 	}
-	
+
 	@PostConstruct
 	public void initialize() {
 		try {
@@ -43,19 +46,19 @@ public class QuartzScheduler {
 
 			Runnable quartzMe = new StartQuartz(url);
 			new Thread(quartzMe).start();
-			
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	class StartQuartz implements Runnable {
 		private final String url;
 
 		public StartQuartz(String url) {
 			this.url = url;
 		}
-		
+
 		@Override
 		public void run() {
 			try {
@@ -72,20 +75,20 @@ public class QuartzScheduler {
 			Thread.sleep(TEN_SECONDS);
 		}
 	}
-	
+
 	public void add(JobDetail job, Trigger trigger) throws SchedulerException {
 		scheduler.scheduleJob(job, trigger);
 	}
-	
+
 	public void start() throws SchedulerException {
 		scheduler.start();
 		initialized = true;
 	}
-	
+
 	public boolean isInitialized() {
 		return initialized;
 	}
-	
+
 	@PreDestroy
 	public void destroy() throws SchedulerException {
 		scheduler.shutdown();

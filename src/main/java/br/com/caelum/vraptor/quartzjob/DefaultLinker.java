@@ -2,23 +2,27 @@ package br.com.caelum.vraptor.quartzjob;
 
 import java.lang.reflect.Method;
 
-import br.com.caelum.vraptor.http.route.Router;
-import br.com.caelum.vraptor.ioc.Component;
-import br.com.caelum.vraptor.proxy.MethodInvocation;
-import br.com.caelum.vraptor.proxy.Proxifier;
-import br.com.caelum.vraptor.proxy.SuperMethod;
+import javax.inject.Inject;
 
-@Component
+import br.com.caelum.vraptor4.http.route.Router;
+import br.com.caelum.vraptor4.proxy.MethodInvocation;
+import br.com.caelum.vraptor4.proxy.Proxifier;
+import br.com.caelum.vraptor4.proxy.SuperMethod;
+
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DefaultLinker implements Linker {
 
-	public Method method;
-	public Object[] args;
-	private final Proxifier proxifier;
-	private final Router router;
+	private Method method;
+	private Object[] args;
+	private Proxifier proxifier;
+	private Router router;
 	private Class controllerType;
-	private final Env env;
+	private Env env;
 
+	@Deprecated// CDI eyes only
+	public DefaultLinker() {}
+
+	@Inject
 	DefaultLinker(Proxifier p, Router router, Env env) {
 		this.proxifier = p;
 		this.router = router;
@@ -29,12 +33,14 @@ public class DefaultLinker implements Linker {
 	public <T> T linkTo(T controller) {
 		return (T) linkTo(controller.getClass());
 	}
+
 	@Override
 	public <T> T linkTo(Class<T> controllerType) {
 		this.controllerType = controllerType;
 		MethodInvocation<T> invocation = new CacheInvocation();
 		return proxifier.proxify(controllerType,invocation);
 	}
+
 	class CacheInvocation implements MethodInvocation{
 		public Object intercept(Object proxy, Method method, Object[] args,
 				SuperMethod superMethod) {
@@ -43,6 +49,7 @@ public class DefaultLinker implements Linker {
 			return null;
 		}
 	}
+
 	@Override
 	public String get() {
 		return env.getHostAndContext() + router.urlFor(controllerType, method, args);

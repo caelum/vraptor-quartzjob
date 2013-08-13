@@ -6,23 +6,26 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.vraptor.ioc.Component;
-
-@Component
 public class QuartzConfiguration {
 
 	private final static Logger logger = LoggerFactory.getLogger(QuartzConfiguration.class);
 
-	private final Linker linker;
+	private Linker linker;
 
-	private final QuartzScheduler scheduler;
+	private QuartzScheduler scheduler;
 
+	@Deprecated // CDI eyes only
+	public QuartzConfiguration() {}
+
+	@Inject
 	public QuartzConfiguration(Linker linker, QuartzScheduler scheduler) throws SchedulerException {
 		this.linker = linker;
 		this.scheduler = scheduler;
@@ -39,7 +42,7 @@ public class QuartzConfiguration {
 					.withIdentity(task.getClass().getName(), "gnarus")
 					.usingJobData("url", url)
 					.build();
-			
+
 			Trigger trigger = newTrigger()
 					.withIdentity(task.getClass().getName(), "gnarus")
 					.withSchedule(cronSchedule(task.frequency()))
@@ -48,13 +51,13 @@ public class QuartzConfiguration {
 					.build();
 
 			logger.info("Registering " + task.getClass().getName() + " to run every " + task.frequency());
-			
+
 			scheduler.add(job, trigger);
 		}
-		
+
 		scheduler.start();
 		logger.info("Quartz configured and started!");
 
-		
+
 	}
 }
