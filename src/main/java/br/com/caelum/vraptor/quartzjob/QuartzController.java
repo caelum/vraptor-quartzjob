@@ -34,7 +34,8 @@ public class QuartzController {
 
 	@Get("/jobs/configure")
 	public void config() throws SchedulerException {
-		if(!scheduler.isInitialized()) cfg.configure(tasks);
+		if (!scheduler.isInitialized()) 
+			cfg.configure(tasks);
 		result.nothing();
 	}
 }

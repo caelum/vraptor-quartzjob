@@ -31,7 +31,7 @@ public class DefaultLinker implements Linker {
 
 	@Override
 	public <T> T linkTo(T controller) {
-		return (T) linkTo(controller.getClass());
+		return (T) linkTo(controller.getClass().getSuperclass());
 	}
 
 	@Override
