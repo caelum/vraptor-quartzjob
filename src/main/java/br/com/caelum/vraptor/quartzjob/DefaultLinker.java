@@ -4,10 +4,10 @@ import java.lang.reflect.Method;
 
 import javax.inject.Inject;
 
-import br.com.caelum.vraptor4.http.route.Router;
-import br.com.caelum.vraptor4.proxy.MethodInvocation;
-import br.com.caelum.vraptor4.proxy.Proxifier;
-import br.com.caelum.vraptor4.proxy.SuperMethod;
+import br.com.caelum.vraptor.http.route.Router;
+import br.com.caelum.vraptor.proxy.MethodInvocation;
+import br.com.caelum.vraptor.proxy.Proxifier;
+import br.com.caelum.vraptor.proxy.SuperMethod;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DefaultLinker implements Linker {

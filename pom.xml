@@ -28,10 +28,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>br.com.caelum</groupId>
-			<artifactId>vraptor4</artifactId>
-			<version>4.0-SNAPSHOT</version>
-			<scope>compile</scope>
+			<artifactId>vraptor</artifactId>
+			<version>4.0.0.beta-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<version>1.1</version>
+		</dependency>		
+		
 		<dependency>
 			<groupId>br.com.caelum.vraptor</groupId>
 			<artifactId>vraptor-environment</artifactId>
