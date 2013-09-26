@@ -1,5 +1,6 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
