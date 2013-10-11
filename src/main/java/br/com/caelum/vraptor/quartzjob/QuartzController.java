@@ -2,6 +2,8 @@ package br.com.caelum.vraptor.quartzjob;
 
 import java.util.List;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.quartz.SchedulerException;
@@ -9,6 +11,8 @@ import org.quartz.SchedulerException;
 import br.com.caelum.vraptor.Controller;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Result;
+
+import com.google.common.collect.Lists;
 
 @Controller
 public class QuartzController {
@@ -22,11 +26,10 @@ public class QuartzController {
 	public QuartzController() {}
 
 	@Inject
-	public QuartzController(List<CronTask> tasks,
+	public QuartzController(@Any Instance<CronTask> tasks,
 			QuartzConfiguration cfg, QuartzScheduler
 			scheduler, Result result) {
-
-		this.tasks = tasks;
+		this.tasks = Lists.newArrayList(tasks);
 		this.cfg = cfg;
 		this.scheduler = scheduler;
 		this.result = result;
