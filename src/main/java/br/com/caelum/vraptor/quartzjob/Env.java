@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 
 import br.com.caelum.vraptor.environment.Environment;
 
-@javax.enterprise.context.ApplicationScoped
+@ApplicationScoped
 public class Env {
 
 	private Environment env;
