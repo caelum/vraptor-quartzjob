@@ -24,7 +24,7 @@ public class QuartzHttpRequestJob implements Job {
 			int statusCode = requestExecutor.execute(url);
 			logger.info("task returned status code " + statusCode);
 		} catch(Exception e) {
-			throw new JobExecutionException(e.getCause());
+			throw new JobExecutionException(e);
 		}
 	}
 }
