@@ -25,10 +25,10 @@ public class QuartzConfiguration {
 	private QuartzScheduler scheduler;
 
 	@Deprecated // CDI eyes only
-	public QuartzConfiguration() {}
+	QuartzConfiguration() {}
 
 	@Inject
-	public QuartzConfiguration(Linker linker, QuartzScheduler scheduler) throws SchedulerException {
+	public QuartzConfiguration(Linker linker, QuartzScheduler scheduler) {
 		this.linker = linker;
 		this.scheduler = scheduler;
 	}
