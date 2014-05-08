@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 public class QuartzConfiguration {
 
+	private static final String JOB_IDENTIFIER = "vraptor-request-job";
+
 	private final static Logger logger = LoggerFactory.getLogger(QuartzConfiguration.class);
 
 	private Linker linker;
@@ -39,14 +41,14 @@ public class QuartzConfiguration {
 			String url = linker.get().replace("https", "http");
 
 			JobDetail job = newJob(QuartzHttpRequestJob.class)
-					.withIdentity(task.getClass().getName(), "gnarus")
+					.withIdentity(task.getClass().getName(), JOB_IDENTIFIER)
 					.usingJobData("url", url)
 					.build();
 
 			Trigger trigger = newTrigger()
-					.withIdentity(task.getClass().getName(), "gnarus")
+					.withIdentity(task.getClass().getName(), JOB_IDENTIFIER)
 					.withSchedule(cronSchedule(task.frequency()))
-					.forJob(task.getClass().getName(), "gnarus")
+					.forJob(task.getClass().getName(), JOB_IDENTIFIER)
 					.startNow()
 					.build();
 
