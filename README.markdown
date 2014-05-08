@@ -6,12 +6,14 @@ A simple quartz scheduler
 
 Vraptor-quartzjob.jar can be downloaded from maven's repository, or configured in any compatible tool:
 
-		<dependency>
-			<groupId>br.com.caelum.vraptor</groupId>
-			<artifactId>vraptor-quartzjob</artifactId>
-			<version>1.0.0</version>
-			<scope>compile</scope>
-		</dependency>
+```xml
+<dependency>
+    <groupId>br.com.caelum.vraptor</groupId>
+    <artifactId>vraptor-quartzjob</artifactId>
+    <version>4.0.0.Final</version>
+    <scope>compile</scope>
+</dependency>
+```
 
 # help
 
