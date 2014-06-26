@@ -75,8 +75,7 @@ public class QuartzScheduler {
 		public void waitForServerStartup(HttpClient http) throws HttpException, IOException, InterruptedException  {
 			long startTime = System.currentTimeMillis();
 			int executeMethod = 0;
-			boolean waitForTwoMinutesOrStatusCode200 = (System.currentTimeMillis()-startTime)< TWO_MINUTES && executeMethod != 200;
-			while (waitForTwoMinutesOrStatusCode200){
+			while (System.currentTimeMillis()-startTime < TWO_MINUTES && executeMethod != 200){
 				Thread.sleep(TEN_SECONDS);
 				executeMethod = http.executeMethod(new GetMethod(env.get("host")));
 			}
