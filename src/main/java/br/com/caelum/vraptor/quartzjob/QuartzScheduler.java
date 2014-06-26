@@ -1,11 +1,14 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -53,6 +56,7 @@ public class QuartzScheduler {
 	}
 
 	class StartQuartz implements Runnable {
+		private static final int TWO_MINUTES = 2*60*1000;
 		private final String url;
 
 		public StartQuartz(String url) {
@@ -62,17 +66,22 @@ public class QuartzScheduler {
 		@Override
 		public void run() {
 			try {
-				waitForServerStartup();
-				logger.info("Invoking quartz configurator at " + url);
 				HttpClient http = new HttpClient();
+				waitForServerStartup(http);
+				logger.info("Invoking quartz configurator at " + url);
 				http.executeMethod(new GetMethod(url));
 			} catch (Exception e) {
 				logger.error("Could not start quartz!", e);
 			}
 		}
 
-		private void waitForServerStartup() throws InterruptedException {
-			Thread.sleep(TEN_SECONDS);
+		public void waitForServerStartup(HttpClient http) throws HttpException, IOException, InterruptedException  {
+			long startTime = System.currentTimeMillis();
+			int executeMethod = 0;
+			while (System.currentTimeMillis()-startTime < TWO_MINUTES && executeMethod != 200){
+				Thread.sleep(TEN_SECONDS);
+				executeMethod = http.executeMethod(new GetMethod(env.get("host")));
+			}
 		}
 	}
 
