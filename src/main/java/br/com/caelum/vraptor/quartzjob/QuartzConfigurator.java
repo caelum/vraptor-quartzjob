@@ -52,6 +52,7 @@ public class QuartzConfigurator {
 			new Thread(quartzMe).start();
 
 		} catch (Exception e) {
+			logger.error("could not schedule job", e);
 			throw new RuntimeException(e);
 		}
 	}
