@@ -18,8 +18,8 @@ import com.google.common.collect.Lists;
 public class QuartzController {
 
 	private List<CronTask> tasks;
-	private QuartzConfiguration cfg;
-	private QuartzScheduler scheduler;
+	private QuartzScheduler cfg;
+	private QuartzConfigurator scheduler;
 	private Result result;
 
 	@Deprecated // CDI eyes only
@@ -27,7 +27,7 @@ public class QuartzController {
 
 	@Inject
 	public QuartzController(@Any Instance<CronTask> tasks,
-			QuartzConfiguration cfg, QuartzScheduler
+			QuartzScheduler cfg, QuartzConfigurator
 			scheduler, Result result) {
 		this.tasks = Lists.newArrayList(tasks);
 		this.cfg = cfg;

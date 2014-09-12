@@ -1,105 +1,77 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import java.io.IOException;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
+import java.util.List;
+
 import javax.inject.Inject;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.vraptor.environment.Environment;
+import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
+import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
 
-@ApplicationScoped
 public class QuartzScheduler {
-
-	private static final int TEN_SECONDS = 10000;
-	private Scheduler scheduler;
-	private boolean initialized;
-
+	public static final String METHOD_FACTORY = "methodFactory";
+	
+	private static final String JOB_IDENTIFIER = "vraptor-request-job";
 	private final static Logger logger = LoggerFactory.getLogger(QuartzScheduler.class);
-	private Environment env;
+
+	private Linker linker;
+
+	private QuartzConfigurator scheduler;
+
+	private HttpRequestExecutor methodFactory;
 
 	@Deprecated // CDI eyes only
-	public QuartzScheduler() {}
+	QuartzScheduler() {}
 
 	@Inject
-	public QuartzScheduler(Environment env) throws SchedulerException {
-		this.env = env;
-		scheduler = StdSchedulerFactory.getDefaultScheduler();
+	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
+						   HttpRequestExecutor methodFactory) {
+		this.linker = linker;
+		this.scheduler = scheduler;
+		this.methodFactory = methodFactory;
 	}
 
-	@PostConstruct
-	public void initialize() {
-		try {
-			logger.info("Quartz servlet config initializing...");
-			if(!env.getName().equals("production")) return;
+	public void configure(List<CronTask> tasks) throws SchedulerException {
+		logger.info("Starting to configure quartz: " + tasks.size() + " tasks found");
 
-			String url = (env.get("host") + "/jobs/configure").replace("https", "http");
+		for(CronTask task : tasks) {
+			linker.linkTo(task).execute();
+			String url = linker.get().replace("https", "http");
+			
+			JobDataMap data = new JobDataMap();
+			data.put("url", url);
+			data.put(METHOD_FACTORY, methodFactory);
+			
+			JobDetail job = newJob(QuartzHttpRequestJob.class)
+					.withIdentity(task.getClass().getName(), JOB_IDENTIFIER)
+					.usingJobData(data)
+					.build();
 
-			Runnable quartzMe = new StartQuartz(url);
-			new Thread(quartzMe).start();
+			Trigger trigger = newTrigger()
+					.withIdentity(task.getClass().getName(), JOB_IDENTIFIER)
+					.withSchedule(cronSchedule(task.frequency()))
+					.forJob(task.getClass().getName(), JOB_IDENTIFIER)
+					.startNow()
+					.build();
 
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+			logger.info("Registering " + task.getClass().getName() + " to run every " + task.frequency());
 
-	class StartQuartz implements Runnable {
-		private static final int TWO_MINUTES = 2*60*1000;
-		private final String url;
-
-		public StartQuartz(String url) {
-			this.url = url;
-		}
-
-		@Override
-		public void run() {
-			try {
-				HttpClient http = new HttpClient();
-				waitForServerStartup(http);
-				logger.info("Invoking quartz configurator at " + url);
-				http.executeMethod(new GetMethod(url));
-			} catch (Exception e) {
-				logger.error("Could not start quartz!", e);
-			}
+			scheduler.add(job, trigger);
 		}
 
-		public void waitForServerStartup(HttpClient http) throws HttpException, IOException, InterruptedException  {
-			long startTime = System.currentTimeMillis();
-			int executeMethod = 0;
-			while (System.currentTimeMillis()-startTime < TWO_MINUTES && executeMethod != 200){
-				Thread.sleep(TEN_SECONDS);
-				executeMethod = http.executeMethod(new GetMethod(env.get("host")));
-			}
-		}
-	}
-
-	public void add(JobDetail job, Trigger trigger) throws SchedulerException {
-		scheduler.scheduleJob(job, trigger);
-	}
-
-	public void start() throws SchedulerException {
 		scheduler.start();
-		initialized = true;
-	}
+		logger.info("Quartz configured and started!");
 
-	public boolean isInitialized() {
-		return initialized;
-	}
 
-	@PreDestroy
-	public void destroy() throws SchedulerException {
-		scheduler.shutdown();
 	}
 }

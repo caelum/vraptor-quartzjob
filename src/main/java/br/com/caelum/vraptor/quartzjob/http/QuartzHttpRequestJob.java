@@ -7,7 +7,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.vraptor.quartzjob.QuartzConfiguration;
+import br.com.caelum.vraptor.quartzjob.QuartzScheduler;
 
 public class QuartzHttpRequestJob implements Job {
 
@@ -17,7 +17,7 @@ public class QuartzHttpRequestJob implements Job {
 	public void execute(JobExecutionContext ctx) throws JobExecutionException {
 		JobDataMap data = ctx.getMergedJobDataMap();
 		String url = (String) data.get("url");
-		HttpRequestExecutor requestExecutor = (HttpRequestExecutor) data.get(QuartzConfiguration.METHOD_FACTORY);
+		HttpRequestExecutor requestExecutor = (HttpRequestExecutor) data.get(QuartzScheduler.METHOD_FACTORY);
 
 		try {
 			logger.info("executing task in URL " + url);
