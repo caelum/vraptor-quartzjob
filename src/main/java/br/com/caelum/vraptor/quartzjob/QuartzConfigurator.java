@@ -5,8 +5,10 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import br.com.caelum.vraptor.events.VRaptorInitialized;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -39,8 +41,7 @@ public class QuartzConfigurator {
 		scheduler = StdSchedulerFactory.getDefaultScheduler();
 	}
 
-	@PostConstruct
-	public void initialize() {
+	public void initialize(@Observes VRaptorInitialized event) {
 		try {
 			logger.info("Quartz servlet config initializing...");
 			if(!env.getName().equals("production")) return;
