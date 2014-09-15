@@ -43,8 +43,12 @@ public class QuartzConfigurator {
 
 	public void initialize(@Observes VRaptorInitialized event) {
 		try {
-			logger.info("Quartz servlet config initializing...");
-			if(!env.getName().equals("production")) return;
+			boolean notProduction = !env.getName().equals("production");
+			boolean force = Boolean.parseBoolean(env.get("force.quartz.jobs", "false"));
+
+			if (notProduction && !force) return;
+
+			logger.info("Quartz configurator initializing...");
 
 			String url = (env.get("host") + "/jobs/configure").replace("https", "http");
 
