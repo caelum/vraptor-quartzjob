@@ -24,7 +24,7 @@ So, for example, add to your development.properties de following configuration:
 host=http://localhost:8080
 ```
 
-For more information about environments, check the (VRaptor docs)[http://www.vraptor.org/en/docs/environment].
+For more information about environments, check the [VRaptor docs](http://www.vraptor.org/en/docs/environment).
 
 To schedule jobs in your application, simply create a controller and implement the CronTask interface:
 
