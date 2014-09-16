@@ -10,7 +10,7 @@ Vraptor-quartzjob.jar can be downloaded from maven's repository, or configured i
 <dependency>
     <groupId>br.com.caelum.vraptor</groupId>
     <artifactId>vraptor-quartzjob</artifactId>
-    <version>4.0.0.Final</version>
+    <version>4.0.2</version> <!--or the latest version-->
     <scope>compile</scope>
 </dependency>
 ```
