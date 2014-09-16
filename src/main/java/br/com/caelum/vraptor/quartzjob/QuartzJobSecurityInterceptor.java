@@ -17,7 +17,8 @@ import br.com.caelum.vraptor.view.Results;
 
 @Intercepts
 public class QuartzJobSecurityInterceptor {
-	
+
+    @Inject
 	@Property(defaultValue="unsecured", value=VRAPTOR_QUARTZ_KEY) 
 	private String securityKey;
 	@Inject
