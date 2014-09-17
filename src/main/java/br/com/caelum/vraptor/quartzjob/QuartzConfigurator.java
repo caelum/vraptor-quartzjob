@@ -73,21 +73,16 @@ public class QuartzConfigurator {
 		public void run() {
 			try {
 				HttpClient http = new HttpClient();
-				waitForServerStartup(http);
+				waitTenSeconds(http);
 				logger.info("Invoking quartz configurator at " + url);
 				http.executeMethod(new GetMethod(url));
 			} catch (Exception e) {
-				logger.error("Could not start quartz!", e);
+				logger.error("Could not configure quartz!", e);
 			}
 		}
 
-		public void waitForServerStartup(HttpClient http) throws HttpException, IOException, InterruptedException  {
-			long startTime = System.currentTimeMillis();
-			int executeMethod = 0;
-			while (System.currentTimeMillis()-startTime < TWO_MINUTES && executeMethod != 200){
-				Thread.sleep(TEN_SECONDS);
-				executeMethod = http.executeMethod(new GetMethod(env.get("host")));
-			}
+		public void waitTenSeconds(HttpClient http) throws InterruptedException  {
+			Thread.sleep(TEN_SECONDS);
 		}
 	}
 
