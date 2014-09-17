@@ -1,18 +1,14 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import java.util.List;
-
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
-import org.quartz.SchedulerException;
-
 import br.com.caelum.vraptor.Controller;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Result;
-
 import com.google.common.collect.Lists;
+import org.quartz.SchedulerException;
+
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import java.util.List;
 
 @Controller
 public class QuartzController {
@@ -26,7 +22,7 @@ public class QuartzController {
 	public QuartzController() {}
 
 	@Inject
-	public QuartzController(@Any Instance<CronTask> tasks,
+	public QuartzController(Instance<CronTask> tasks,
 			QuartzScheduler cfg, QuartzConfigurator
 			scheduler, Result result) {
 		this.tasks = Lists.newArrayList(tasks);
@@ -37,7 +33,7 @@ public class QuartzController {
 
 	@Get("/jobs/configure")
 	public void config() throws SchedulerException {
-		if (!scheduler.isInitialized()) 
+		if (!scheduler.isInitialized())
 			cfg.configure(tasks);
 		result.nothing();
 	}

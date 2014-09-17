@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import javax.inject.Inject;
 
 import br.com.caelum.vraptor.http.route.Router;
+import br.com.caelum.vraptor.proxy.CDIProxies;
 import br.com.caelum.vraptor.proxy.MethodInvocation;
 import br.com.caelum.vraptor.proxy.Proxifier;
 import br.com.caelum.vraptor.proxy.SuperMethod;
@@ -31,7 +32,8 @@ public class DefaultLinker implements Linker {
 
 	@Override
 	public <T> T linkTo(T controller) {
-		return (T) linkTo(controller.getClass().getSuperclass());
+		Class<T> clazz = (Class<T>) CDIProxies.extractRawTypeIfPossible(controller.getClass());
+		return (T) linkTo(clazz);
 	}
 
 	@Override
