@@ -1,5 +1,6 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import br.com.caelum.vraptor.http.route.Router;
 import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
 import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
 import org.quartz.JobDataMap;
@@ -9,8 +10,14 @@ import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.spi.Bean;
 import javax.inject.Inject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
@@ -28,22 +35,25 @@ public class QuartzScheduler {
 
 	private HttpRequestExecutor methodFactory;
 
+	private Router router;
+
 	@Deprecated // CDI eyes only
 	QuartzScheduler() {}
 
 	@Inject
 	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
-						   HttpRequestExecutor methodFactory) {
+						   HttpRequestExecutor methodFactory, Router router) {
 		this.linker = linker;
 		this.scheduler = scheduler;
 		this.methodFactory = methodFactory;
+		this.router = router;
 	}
 
-	public void configure(List<CronTask> tasks)  {
+	public void configure(Set<Bean<?>> tasks)  {
 		logger.info("Starting to configure quartz tasks found");
 
 		try {
-			for(CronTask task : tasks) {
+			for(Bean<?> task : tasks) {
 				configureTrigger(task);
 			}
 			scheduler.start();
@@ -54,10 +64,12 @@ public class QuartzScheduler {
 
 	}
 
-	private void configureTrigger(CronTask task) throws SchedulerException {
+	private void configureTrigger(Bean<?> bean) throws SchedulerException {
+		Class<CronTask> taskClass = (Class<CronTask>) bean.getBeanClass();
+		CronTask task = newInstance(taskClass);
 
-		linker.<CronTask>linkTo(task).execute();
-		String url = linker.get().replace("https", "http");
+		Method method = getMethod(taskClass);
+		String url = router.urlFor(taskClass, method);
 
 		JobDataMap data = new JobDataMap();
 		data.put("url", url);
@@ -78,6 +90,30 @@ public class QuartzScheduler {
 		logger.info("Registering " + task.getClass().getName() + " to run every " + task.frequency());
 
 		scheduler.add(job, trigger);
+	}
+
+	private Method getMethod(Class<CronTask> taskClass) {
+		try {
+			return taskClass.getMethod("execute");
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private CronTask newInstance(Class<CronTask> task) {
+		try {
+			Constructor<CronTask> defaultConstructor = task.getDeclaredConstructor();
+			defaultConstructor.setAccessible(true);
+			return defaultConstructor.newInstance();
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
