@@ -1,5 +1,6 @@
 package br.com.caelum.vraptor.quartzjob;
 
+import br.com.caelum.vraptor.environment.Environment;
 import br.com.caelum.vraptor.http.route.Router;
 import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
 import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
@@ -37,16 +38,20 @@ public class QuartzScheduler {
 
 	private Router router;
 
+	private Environment env;
+
 	@Deprecated // CDI eyes only
 	QuartzScheduler() {}
 
 	@Inject
 	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
-						   HttpRequestExecutor methodFactory, Router router) {
+						   HttpRequestExecutor methodFactory, Router router,
+						   Environment env) {
 		this.linker = linker;
 		this.scheduler = scheduler;
 		this.methodFactory = methodFactory;
 		this.router = router;
+		this.env = env;
 	}
 
 	public void configure(Set<Bean<?>> tasks)  {
@@ -69,7 +74,7 @@ public class QuartzScheduler {
 		CronTask task = newInstance(taskClass);
 
 		Method method = getMethod(taskClass);
-		String url = router.urlFor(taskClass, method);
+		String url = env.get("host") + router.urlFor(taskClass, method);
 
 		JobDataMap data = new JobDataMap();
 		data.put("url", url);
