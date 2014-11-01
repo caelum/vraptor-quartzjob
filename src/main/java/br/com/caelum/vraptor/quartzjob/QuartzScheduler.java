@@ -1,9 +1,15 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import br.com.caelum.vraptor.environment.Environment;
-import br.com.caelum.vraptor.http.route.Router;
-import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
-import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
+
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
@@ -11,18 +17,11 @@ import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.inject.spi.Bean;
-import javax.inject.Inject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
+import br.com.caelum.vraptor.environment.Environment;
+import br.com.caelum.vraptor.http.route.Router;
+import br.com.caelum.vraptor.ioc.Container;
+import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
+import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
 
 public class QuartzScheduler {
 	public static final String METHOD_FACTORY = "methodFactory";
@@ -36,22 +35,27 @@ public class QuartzScheduler {
 
 	private HttpRequestExecutor methodFactory;
 
-	private Router router;
+	private final Router router;
 
-	private Environment env;
+	private final Environment env;
+	
+	private final Container container;
 
 	@Deprecated // CDI eyes only
-	QuartzScheduler() {}
+	QuartzScheduler() {
+		this(null, null, null, null, null, null);
+	}
 
 	@Inject
 	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
 						   HttpRequestExecutor methodFactory, Router router,
-						   Environment env) {
+						   Environment env, Container container) {
 		this.linker = linker;
 		this.scheduler = scheduler;
 		this.methodFactory = methodFactory;
 		this.router = router;
 		this.env = env;
+		this.container = container;
 	}
 
 	public void configure(Set<Bean<?>> tasks)  {
@@ -105,20 +109,8 @@ public class QuartzScheduler {
 		}
 	}
 
-	private CronTask newInstance(Class<CronTask> task) {
-		try {
-			Constructor<CronTask> defaultConstructor = task.getDeclaredConstructor();
-			defaultConstructor.setAccessible(true);
-			return defaultConstructor.newInstance();
-		} catch (InstantiationException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
+	private CronTask newInstance(Class<CronTask> task) {  
+		return container.instanceFor(task);
 	}
 
 }
