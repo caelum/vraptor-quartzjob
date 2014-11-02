@@ -1,14 +1,10 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.lang.reflect.Method;
-import java.util.Set;
-
-import javax.enterprise.inject.spi.Bean;
-import javax.inject.Inject;
+import br.com.caelum.vraptor.environment.Environment;
+import br.com.caelum.vraptor.http.route.Router;
+import br.com.caelum.vraptor.ioc.Container;
+import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
+import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -17,11 +13,18 @@ import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.vraptor.environment.Environment;
-import br.com.caelum.vraptor.http.route.Router;
-import br.com.caelum.vraptor.ioc.Container;
-import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
-import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
+
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 public class QuartzScheduler {
 	public static final String METHOD_FACTORY = "methodFactory";
@@ -35,16 +38,14 @@ public class QuartzScheduler {
 
 	private HttpRequestExecutor methodFactory;
 
-	private final Router router;
+	private Router router;
 
-	private final Environment env;
+	private Environment env;
 	
-	private final Container container;
+	private Container container;
 
 	@Deprecated // CDI eyes only
-	QuartzScheduler() {
-		this(null, null, null, null, null, null);
-	}
+	QuartzScheduler() {}
 
 	@Inject
 	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
