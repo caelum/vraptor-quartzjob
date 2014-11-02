@@ -1,10 +1,14 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import br.com.caelum.vraptor.environment.Environment;
-import br.com.caelum.vraptor.http.route.Router;
-import br.com.caelum.vraptor.ioc.Container;
-import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
-import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
+
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -12,19 +16,11 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.inject.spi.Bean;
-import javax.inject.Inject;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
+import br.com.caelum.vraptor.environment.Environment;
+import br.com.caelum.vraptor.http.route.Router;
+import br.com.caelum.vraptor.ioc.Container;
+import br.com.caelum.vraptor.quartzjob.http.HttpRequestExecutor;
+import br.com.caelum.vraptor.quartzjob.http.QuartzHttpRequestJob;
 
 public class QuartzScheduler {
 	public static final String METHOD_FACTORY = "methodFactory";
@@ -38,14 +34,16 @@ public class QuartzScheduler {
 
 	private HttpRequestExecutor methodFactory;
 
-	private Router router;
-
-	private Environment env;
+	private final Router router;
 	
-	private Container container;
+	private final Environment env;
+	
+	private final Container container;
 
 	@Deprecated // CDI eyes only
-	QuartzScheduler() {}
+	QuartzScheduler() {
+		this(null, null, null, null, null, null);
+	}
 
 	@Inject
 	public QuartzScheduler(Linker linker, QuartzConfigurator scheduler,
