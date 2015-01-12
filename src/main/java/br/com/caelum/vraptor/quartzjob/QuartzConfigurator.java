@@ -1,8 +1,5 @@
 package br.com.caelum.vraptor.quartzjob;
 
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -10,7 +7,6 @@ import javax.inject.Inject;
 
 import br.com.caelum.vraptor.events.VRaptorInitialized;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -25,7 +21,6 @@ import br.com.caelum.vraptor.environment.Environment;
 @ApplicationScoped
 public class QuartzConfigurator {
 
-	private static final int TEN_SECONDS = 10000;
 	private Scheduler scheduler;
 	private boolean initialized;
 
@@ -62,7 +57,7 @@ public class QuartzConfigurator {
 	}
 
 	class StartQuartz implements Runnable {
-		private static final int TWO_MINUTES = 2*60*1000;
+		private final Integer ONE_MINUTE = 1*60*1000;
 		private final String url;
 
 		public StartQuartz(String url) {
@@ -73,7 +68,7 @@ public class QuartzConfigurator {
 		public void run() {
 			try {
 				HttpClient http = new HttpClient();
-				waitTenSeconds(http);
+				waitStartup();
 				logger.info("Invoking quartz configurator at " + url);
 				http.executeMethod(new GetMethod(url));
 			} catch (Exception e) {
@@ -81,8 +76,9 @@ public class QuartzConfigurator {
 			}
 		}
 
-		public void waitTenSeconds(HttpClient http) throws InterruptedException  {
-			Thread.sleep(TEN_SECONDS);
+		public void waitStartup() throws InterruptedException  {
+			String waitTime = env.get("quartz.wait.time", ONE_MINUTE.toString());
+			Thread.sleep(Long.parseLong(waitTime));
 		}
 	}
 
