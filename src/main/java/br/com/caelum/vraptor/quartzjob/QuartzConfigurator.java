@@ -4,6 +4,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.servlet.ServletContext;
 
 import br.com.caelum.vraptor.events.VRaptorInitialized;
 import org.apache.commons.httpclient.HttpClient;
@@ -26,13 +27,15 @@ public class QuartzConfigurator {
 
 	private final static Logger logger = LoggerFactory.getLogger(QuartzConfigurator.class);
 	private Environment env;
+	private ServletContext ctx;
 
 	@Deprecated // CDI eyes only
 	public QuartzConfigurator() {}
 
 	@Inject
-	public QuartzConfigurator(Environment env) throws SchedulerException {
+	public QuartzConfigurator(Environment env, ServletContext ctx) throws SchedulerException {
 		this.env = env;
+		this.ctx = ctx;
 	}
 
 	public void initialize(@Observes VRaptorInitialized event) {
@@ -44,8 +47,9 @@ public class QuartzConfigurator {
 
 			logger.info("Quartz configurator initializing...");
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
-			
-			String url = (env.get("host") + "/jobs/configure").replace("https", "http");
+
+			String url = (env.get("host") + ctx.getContextPath() + "/jobs/configure")
+					.replace("https", "http");
 
 			Runnable quartzMe = new StartQuartz(url);
 			new Thread(quartzMe).start();
