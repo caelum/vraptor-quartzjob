@@ -33,7 +33,6 @@ public class QuartzConfigurator {
 	@Inject
 	public QuartzConfigurator(Environment env) throws SchedulerException {
 		this.env = env;
-		scheduler = StdSchedulerFactory.getDefaultScheduler();
 	}
 
 	public void initialize(@Observes VRaptorInitialized event) {
@@ -44,7 +43,8 @@ public class QuartzConfigurator {
 			if (notProduction && !force) return;
 
 			logger.info("Quartz configurator initializing...");
-
+			scheduler = StdSchedulerFactory.getDefaultScheduler();
+			
 			String url = (env.get("host") + "/jobs/configure").replace("https", "http");
 
 			Runnable quartzMe = new StartQuartz(url);
